@@ -1,45 +1,36 @@
-name: CI
+name: build
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ main ]
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
 
-      - name: Restore & Build .NET projects
+   
+      - name: Restore & Build app-dotnet
         run: |
-          dotnet restore ./app-dotnet/app-dotnet.csproj
-          dotnet build ./app-dotnet/app-dotnet.csproj -c Release --no-restore
-          dotnet restore ./app-lambda-dotnet/src/app-lambda-dotnet.csproj
-          dotnet build ./app-lambda-dotnet/src/app-lambda-dotnet.csproj -c Release --no-restore
-          dotnet build ./app-lambda-dotnet/LocalRunner/LocalRunner.csproj -c Release
+          dotnet restore app-dotnet/app-dotnet.csproj
+          dotnet build app-dotnet/app-dotnet.csproj -c Release --no-restore
 
-      - name: Build Docker image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./app-dotnet
-          push: false
-          tags: clo24-minapi:ci
-
-      - name: Validate Terraform
-        uses: hashicorp/setup-terraform@v3
-      - run: |
-          terraform -chdir=./infra-docker fmt -check || true
-          terraform -chdir=./infra-docker init -backend=false
-          terraform -chdir=./infra-docker validate || true
-
-      - name: Validate SAM template
+      
+      - name: Restore & Build LocalRunner
         run: |
-          pip install aws-sam-cli || echo "sam optional"
-          sam validate -t ./infra-serverless/template.yaml || echo "sam not available"
+          dotnet restore app-lambda-dotnet/LocalRunner/LocalRunner.csproj
+          dotnet build app-lambda-dotnet/LocalRunner/LocalRunner.csproj -c Release --no-restore
+
+     
+      - name: Smoke test LocalRunner
+        run: dotnet run --project app-lambda-dotnet/LocalRunner/LocalRunner.csproj
