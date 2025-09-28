@@ -1,4 +1,4 @@
-name: build
+name: CI
 
 on:
   push:
@@ -19,18 +19,44 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-   
+  
       - name: Restore & Build app-dotnet
         run: |
           dotnet restore app-dotnet/app-dotnet.csproj
-          dotnet build app-dotnet/app-dotnet.csproj -c Release --no-restore
+          dotnet build   app-dotnet/app-dotnet.csproj -c Release --no-restore
 
-      
       - name: Restore & Build LocalRunner
         run: |
           dotnet restore app-lambda-dotnet/LocalRunner/LocalRunner.csproj
-          dotnet build app-lambda-dotnet/LocalRunner/LocalRunner.csproj -c Release --no-restore
+          dotnet build   app-lambda-dotnet/LocalRunner/LocalRunner.csproj -c Release --no-restore
 
-     
       - name: Smoke test LocalRunner
         run: dotnet run --project app-lambda-dotnet/LocalRunner/LocalRunner.csproj
+
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image (app-dotnet)
+        run: docker build -t clo24-minapi:ci -f app-dotnet/Dockerfile app-dotnet
+
+      - name: Validate docker-compose syntax
+        run: docker compose -f app-dotnet/docker-compose.yml config -q
+
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform fmt & validate
+        working-directory: infra-docker
+        run: |
+          terraform init -backend=false
+          terraform fmt -check
+          terraform validate
+
+      
+      - name: Install SAM CLI (lite tyngre steg)
+        run: |
+          pipx install aws-sam-cli || pip install --user aws-sam-cli
+      - name: Validate SAM template
+        run: sam validate -t infra-serverless/template.yaml
