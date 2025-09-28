@@ -51,21 +51,25 @@ jobs:
           terraform fmt -check
           terraform validate
 
+
       - name: Install SAM CLI
         run: pipx install aws-sam-cli || pip install --user aws-sam-cli
 
+
       - name: Configure AWS credentials
-        if: ${{ secrets.AWS_ACCESS_KEY_ID && secrets.AWS_SECRET_ACCESS_KEY }}
+        if: ${{ secrets.AWS_ACCESS_KEY_ID != '' && secrets.AWS_SECRET_ACCESS_KEY != '' }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION != '' && secrets.AWS_REGION || 'eu-north-1' }}
 
+
       - name: Validate SAM template
-        if: ${{ secrets.AWS_ACCESS_KEY_ID && secrets.AWS_SECRET_ACCESS_KEY }}
+        if: ${{ secrets.AWS_ACCESS_KEY_ID != '' && secrets.AWS_SECRET_ACCESS_KEY != '' }}
         run: sam validate -t infra-serverless/template.yaml --region ${{ secrets.AWS_REGION != '' && secrets.AWS_REGION || 'eu-north-1' }}
 
+
       - name: Skip SAM validate (no AWS creds)
-        if: ${{ !(secrets.AWS_ACCESS_KEY_ID && secrets.AWS_SECRET_ACCESS_KEY) }}
+        if: ${{ !(secrets.AWS_ACCESS_KEY_ID != '' && secrets.AWS_SECRET_ACCESS_KEY != '') }}
         run: echo "Skipping SAM validate because no AWS secrets are set."
