@@ -4,7 +4,7 @@ Välkommen till mitt projekt för kursen **Cloud Development (CLO24)**.
 Här demonstrerar jag två olika arkitekturmönster i AWS:  
 
 1. **Containerbaserad miljö** – .NET Minimal API som körs i Docker Swarm på EC2.  
-2. **Serverless miljö** – .NET Lambda bakom API Gateway.  
+2. **Serverless miljö** - .NET Lambda bakom API Gateway.  
 
 Målet är att visa förståelse för **molntjänster, säkerhet, automation (IaC)** och CI/CD.  
 
@@ -15,7 +15,7 @@ Målet är att visa förståelse för **molntjänster, säkerhet, automation (Ia
 ### Container (Swarm)  
 - .NET 8 Minimal API med endpoints `/` och `/health`.  
 - Körs som container i Docker Swarm med två replicas.  
-- Lastbalansering och overlay-nätverk.  
+- Lastbalansering och overlay nätverk.  
 
 **Arkitektur:**  
 ```
