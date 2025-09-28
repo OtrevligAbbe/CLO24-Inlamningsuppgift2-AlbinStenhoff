@@ -3,7 +3,7 @@
 **Kurs:** CLO24 – Cloud Development - Skalbara Molnapplikationer (AWS)  
 **Student:** Albin Stenhoff  
 **Inlämning:** 2025-09-28  
-**GitHub repo:** [https://github.com/OtrevligAbbe/CLO24-Inlamningsuppgift2-AlbinStenhoff](https://github.com/OtrevligAbbe/CLO24-Inlamningsuppgift2-AlbinStenhoff)
+**GitHub repo:** https://github.com/OtrevligAbbe/CLO24-Inlamningsuppgift2-AlbinStenhoff
 
 
 ## Översikt
@@ -87,6 +87,28 @@ Båda alternativen kompletteras med **säkerhetsprinciper, IaC (Infrastructure a
   - Validerar Terraform och SAM.  
 - Säkerställer att koden alltid är i körbart skick.  
 
+## Screenshots
+
+### 1. Bygga projektet med .NET
+[dotnet build success](docs/Screenshots/dotnet build success.png)  
+*Projektet byggdes framgångsrikt med `dotnet build` i PowerShell.*
+
+### 2. Köra projektet lokalt
+[dotnet run local](docs/Screenshots/dotnet run local.png)  
+*Applikationen startas med `dotnet run` och lyssnar på port 8080.*
+
+### 3. Testa API i webbläsare
+[browser health check](docs/Screenshots/browser health check.png)  
+*Webbläsaren visar JSON-svar från API:t på `http://localhost:8080`.*
+
+### 4. Bygga Docker-image
+[docker image built](docs/Screenshots/docker image built.png)  
+*Docker bygger upp en image för applikationen.*
+
+### 5. Container körs i Docker Desktop
+[docker container running](docs/Screenshots/docker container running.png)  
+Containern `clo24-minapi:local` körs i Docker Desktop och exponerar port 8080.
+**Screenshots** hittas i mappen docs - screenshots.
 
 ## Slutsats
 Genom att kombinera **containerbaserad drift (Swarm)** och **serverless (Lambda)** visas två centrala arkitekturmönster i molnutveckling.  
