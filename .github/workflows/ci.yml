@@ -55,8 +55,15 @@ jobs:
           terraform validate
 
       
-      - name: Install SAM CLI (lite tyngre steg)
-        run: |
-          pipx install aws-sam-cli || pip install --user aws-sam-cli
+      - name: Install SAM CLI
+        run: pipx install aws-sam-cli || pip install --user aws-sam-cli
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
       - name: Validate SAM template
-        run: sam validate -t infra-serverless/template.yaml
+        run: sam validate -t infra-serverless/template.yaml --region ${{ secrets.AWS_REGION }}
