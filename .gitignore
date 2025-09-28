@@ -1,0 +1,22 @@
+.vs/
+.vscode/
+bin/
+obj/
+*.user
+*.suo
+*.swp
+
+# Python/Node leftovers
+__pycache__/
+node_modules/
+
+# General
+.env
+*.log
+.DS_Store
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log

@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Minimal .NET Lambda + API Gateway
+
+Globals:
+  Function:
+    Runtime: dotnet8
+    Timeout: 5
+    MemorySize: 256
+
+Resources:
+  ApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: AppLambda::AppLambda.Function::FunctionHandler
+      CodeUri: ../app-lambda-dotnet/src
+      Events:
+        ApiGetRoot:
+          Type: Api
+          Properties:
+            Path: /
+            Method: get
