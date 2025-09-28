@@ -4,7 +4,7 @@ Välkommen till mitt projekt för kursen **Cloud Development (CLO24)**.
 Här demonstrerar jag två olika arkitekturmönster i AWS:  
 
 1. **Containerbaserad miljö** – .NET Minimal API som körs i Docker Swarm på EC2.  
-2. **Serverless-miljö** – .NET Lambda bakom API Gateway.  
+2. **Serverless miljö** – .NET Lambda bakom API Gateway.  
 
 Målet är att visa förståelse för **molntjänster, säkerhet, automation (IaC)** och CI/CD.  
 
@@ -25,7 +25,7 @@ Målet är att visa förståelse för **molntjänster, säkerhet, automation (Ia
 ---
 
 ### Serverless (Lambda)  
-- .NET 8 Lambda-funktion som returnerar JSON.  
+- .NET 8 Lambda funktion som returnerar JSON.  
 - Körs bakom API Gateway (GET /).  
 - Lokal simulering via **LocalRunner** i Visual Studio.  
 
@@ -42,15 +42,15 @@ Målet är att visa förståelse för **molntjänster, säkerhet, automation (Ia
 
 ### CI/CD  
 - GitHub Actions workflow (`.github/workflows/ci.yml`)  
-  - Bygger .NET-projekten.  
+  - Bygger .NET projekten.  
   - Bygger Docker image.  
-  - Validerar Terraform och SAM-template.  
+  - Validerar Terraform och SAM template.  
 
 ---
 
 ## 🛡 Säkerhet  
 - Security Groups: endast 80/443 öppna.  
-- IAM-roller med principen “least privilege”.  
+- IAM roller med principen “least privilege”.  
 - Hemligheter lagras i miljövariabler/Secrets.  
 
 ---
@@ -90,7 +90,7 @@ docker run -p 8080:8080 clo24-minapi:local
 ```
 Testa i webbläsare: [http://localhost:8080/](http://localhost:8080/)  
 
-### 2. Lambda-funktion (LocalRunner)  
+### 2. Lambda funktion (LocalRunner)  
 ```powershell
 cd app-lambda-dotnet
 dotnet build
