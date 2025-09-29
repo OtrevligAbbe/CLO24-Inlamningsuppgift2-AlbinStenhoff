@@ -224,6 +224,12 @@ nästa steg i en verklig miljö vore att konfigurera remote state och en godkän
 ### 5. Container körs i Docker Desktop
 [docker container running](docs/Screenshots/docker container running.png)  
 Containern `clo24-minapi:local` körs i Docker Desktop och exponerar port 8080.
+
+### 6. GitHub Actions – CI/CD pipeline
+[github actions success](docs/Screenshots/github-actions-success.png)  
+*GitHub Actions körde workflowet framgångsrikt. Alla steg - .NET build, Docker build, Terraform validate och SAM validate, gick igenom utan fel.
+Detta verifierar att CI/CD automationen fungerar som tänkt.*
+
 **Screenshots** hittas i mappen docs - screenshots.
 
 **Skalbarhet - verifiering**  
