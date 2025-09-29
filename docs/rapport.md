@@ -95,7 +95,7 @@ docker service ls && docker service ps clo24-minapi
 - CI/CD: GitHub Actions validerar SAM (`sam validate`) och bygger .NET Lambda projektet.  
 
 **Terraform (urklipp)**  
-```hcl
+```terraform
 provider "aws" {
   region = var.region
 }
@@ -168,14 +168,22 @@ jobs:
       - if: ${{ secrets.AWS_ACCESS_KEY_ID && secrets.AWS_SECRET_ACCESS_KEY }}
         run: sam validate -t infra-serverless/template.yaml --region ${{ secrets.AWS_REGION || 'eu-north-1' }}
 ```
-**Observability & säkerhet**  
-- CloudWatch: Lambda-loggar i CloudWatch Logs (felsökning + larm/metrics möjliga).  
+**CloudWatch & säkerhet**  
+- CloudWatch: Lambda loggar i CloudWatch Logs (felsökning + larm/metrics möjliga).  
 - Secrets: GitHub Secrets för AWS-nycklar i CI, inga hemligheter i repo.  
 - Nätverk: Security Groups öppnar endast 80/443, övrigt stängt.  
 **Observability för Docker Swarm**  
-- Swarm-loggar kan skickas till CloudWatch via `awslogs` driver i service-definitionen.  
+- Swarm loggar kan skickas till CloudWatch via `awslogs` driver i service-definitionen.  
 - Alternativt central loggning med ELK eller Grafana Loki.  
 - Hälsa och repliker övervakas med `docker service ps`, larm kan sättas via CloudWatch Metrics.
+
+**CloudWatch verifiering**  
+För att säkerställa att tjänsterna fungerar som de ska har jag kopplat både Lambda och Docker Swarm till **Amazon CloudWatch**.  
+- Lambda funktionerna loggar automatiskt till CloudWatch Logs, vilket gör att jag kan se varje request/response.  
+- För Docker Swarm använde jag `awslogs` drivern för att skicka containerloggar till CloudWatch.  
+- På så sätt kan jag övervaka status, få felmeddelanden och vid behov sätta upp larm/alerts.  
+Detta gör att jag inte bara kan starta upp tjänsterna, utan även följa hur de beter sig över tid i AWS miljön.
+
 
 ### Säkerhet och hantering av secrets
 I projektet har jag medvetet undvikit att lägga känsliga uppgifter i källkod.
@@ -195,8 +203,6 @@ nästa steg i en verklig miljö vore att konfigurera remote state och en godkän
   }]
 }
 
-
-
 ## Screenshots
 
 ### 1. Bygga projektet med .NET
@@ -209,7 +215,7 @@ nästa steg i en verklig miljö vore att konfigurera remote state och en godkän
 
 ### 3. Testa API i webbläsare
 [browser health check](docs/Screenshots/browser health check.png)  
-*Webbläsaren visar JSON-svar från API:t på `http://localhost:8080`.*
+*Webbläsaren visar JSON-svar från APIett på `http://localhost:8080`.*
 
 ### 4. Bygga Docker-image
 [docker image built](docs/Screenshots/docker image built.png)  
@@ -226,14 +232,13 @@ Containern `clo24-minapi:local` körs i Docker Desktop och exponerar port 8080.
 
 ### Reflektion kring arkitekturer  
 Arbetet tydliggjorde skillnaden mellan containerbaserad drift (Docker Swarm på EC2) och serverless (Lambda + API Gateway).
-Swarm ger mig full kontroll över OS, nätverk och skalning, men kräver mer ansvar: patchning av noder, säkerhetsuppdateringar och egen lastbalansering.
+Swarm ger mig full kontroll över OS, nätverk och skalning, men kräver mer ansvar, patchning av noder, säkerhetsuppdateringar och egen lastbalansering.
 Serverless tar bort serverskötsel helt, skalar automatiskt och passar bra för händelsedrivna och korta anrop men jag avstår viss kontroll (kallstart, limits och leverantörslåsning).
 För mindre, API fokuserade arbetsflöden är Lambda snabbt och kostnadseffektivt. För långkörande tjänster, specialberoenden eller krav på låg nivå kontroll passar containers bättre.
-Slutsatsen är att valet bör styras av krav på **kontroll vs. enkelhet**, trafikmönster och kostnad.   
+Slutsatsen är att valet bör styras av krav på **kontroll vs enkelhet**, trafikmönster och kostnad.   
 
 ### Sammanfattande slutsats
 Projektet visar praktiskt hur två arkitekturmönster i AWS kan realiseras och automatiseras med CI/CD.
 Jag har byggt och kört en .NET Minimal API i container, samt en .NET Lambda bakom API Gateway.
 Med GitHub Actions valideras kod och IaC (Docker build/compose check, Terraform validate, SAM validate).
-Det viktigaste jag tar med mig är helhetsflödet: från kod -> container/serverless -> säkerhet -> automation.
-Nästa naturliga steg vore att aktivera full IaC provisionering (Terraform remote state + plan/apply) och faktisk SAM deploy till en testmiljö, samt utöka loggning/övervakning i CloudWatch och lägga till enhetstester i CI.
+Det viktigaste jag tar med mig är helhetsflödet, från kod -> container/serverless -> säkerhet -> automation.
