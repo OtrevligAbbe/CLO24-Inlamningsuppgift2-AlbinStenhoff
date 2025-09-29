@@ -10,7 +10,7 @@
 Syftet med denna inlämning är att visa två olika arkitekturer för att köra en webbapplikation i AWS:  
 
 1. **Containerbaserad lösning** - .NET Minimal API körs i Docker Swarm på EC2 instanser.  
-2. **Serverless lösning** – .NET Lambda bakom API Gateway som returnerar JSON.  
+2. **Serverless lösning** - .NET Lambda bakom API Gateway som returnerar JSON.  
 
 Båda alternativen kompletteras med **säkerhetsprinciper, IaC (Infrastructure as Code)** samt **CI/CD automation via GitHub Actions**.
 
@@ -54,7 +54,7 @@ Båda alternativen kompletteras med **säkerhetsprinciper, IaC (Infrastructure a
 
 **Provisionering i AWS (kortfattat)**  
 1. Skapa ett **key pair** i EC2 och en **Security Group** som endast öppnar `22`, `80`, `443`.  
-2. Starta 1 **manager** och 1–2 **worker**-instanser (Amazon Linux 2/Ubuntu) i **eu-north-1**, i samma **VPC/Subnets**.  
+2. Starta 1 **manager** och 1-2 **worker**-instanser (Amazon Linux 2/Ubuntu) i **eu-north-1**, i samma **VPC/Subnets**.  
 3. Installera Docker på alla noder.  
 4. På manager:
   ```bash
@@ -218,14 +218,14 @@ nästa steg i en verklig miljö vore att konfigurera remote state och en godkän
 *Webbläsaren visar JSON-svar från APIett på `http://localhost:8080`.*
 
 ### 4. Bygga Docker-image
-[docker image built](docs/Screenshots/docker image built.png)  
+[docker image built](docs/Screenshots/docker image built.png)  -
 *Docker bygger upp en image för applikationen.*
 
 ### 5. Container körs i Docker Desktop
 [docker container running](docs/Screenshots/docker container running.png)  
 Containern `clo24-minapi:local` körs i Docker Desktop och exponerar port 8080.
 
-### 6. GitHub Actions – CI/CD pipeline
+### 6. GitHub Actions - CI/CD pipeline
 [github actions success](docs/Screenshots/github-actions-success.png)  
 *GitHub Actions körde workflowet framgångsrikt. Alla steg - .NET build, Docker build, Terraform validate och SAM validate, gick igenom utan fel.
 Detta verifierar att CI/CD automationen fungerar som tänkt.*
