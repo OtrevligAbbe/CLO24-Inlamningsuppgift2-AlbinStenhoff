@@ -1,9 +1,9 @@
-# CLO24 – Inlämningsuppgift 2 🚀
+# CLO24 - Inlämningsuppgift 2 🚀
 
 Välkommen till mitt projekt för kursen **Cloud Development (CLO24)**.  
 Här demonstrerar jag två olika arkitekturmönster i AWS:  
 
-1. **Containerbaserad miljö** – .NET Minimal API som körs i Docker Swarm på EC2.  
+1. **Containerbaserad miljö** - .NET Minimal API som körs i Docker Swarm på EC2.  
 2. **Serverless miljö** - .NET Lambda bakom API Gateway.  
 
 Målet är att visa förståelse för **molntjänster, säkerhet, automation (IaC)** och CI/CD.  
@@ -56,11 +56,11 @@ Målet är att visa förståelse för **molntjänster, säkerhet, automation (Ia
 ---
 
 ## 🛠 Technology Stack  
-- **C# (.NET 8)** – API och Lambda.  
-- **Docker + Docker Swarm** – Containerisering och skalning.  
-- **AWS (EC2, API Gateway, Lambda, IAM, VPC, SG)** – Molninfrastruktur.  
-- **Terraform** – Infrastruktur som kod (IaC).  
-- **AWS SAM** – Deployment av serverless.  
+- **C# (.NET 8)** - API och Lambda.  
+- **Docker + Docker Swarm** - Containerisering och skalning.  
+- **AWS (EC2, API Gateway, Lambda, IAM, VPC, SG)** - Molninfrastruktur.  
+- **Terraform** - Infrastruktur som kod (IaC).  
+- **AWS SAM** - Deployment av serverless.  
 - **GitHub Actions** – CI/CD automation.  
 
 ---
