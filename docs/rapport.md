@@ -14,7 +14,6 @@ Syftet med denna inlämning är att visa två olika arkitekturer för att köra 
 
 Båda alternativen kompletteras med **säkerhetsprinciper, IaC (Infrastructure as Code)** samt **CI/CD automation via GitHub Actions**.
 
-
 ## 1. Container - Docker Swarm i AWS
 **Molntjänster:**  
 - **EC2**: kör Swarm noder (mannager + workers).  
@@ -53,6 +52,24 @@ Båda alternativen kompletteras med **säkerhetsprinciper, IaC (Infrastructure a
    `docker service ls` (2/2), `docker service ps clo24-minapi`  
 5) Hälsokoll: `curl http://localhost:8080/health` -> `healthy`  
 
+**Provisionering i AWS (kortfattat)**  
+1. Skapa ett **key pair** i EC2 och en **Security Group** som endast öppnar `22`, `80`, `443`.  
+2. Starta 1 **manager** och 1–2 **worker**-instanser (Amazon Linux 2/Ubuntu) i **eu-north-1**, i samma **VPC/Subnets**.  
+3. Installera Docker på alla noder.  
+4. På manager:
+  ```bash
+   docker swarm init --advertise-addr <manager-private-ip>
+   docker swarm join-token worker
+ ```
+Kopiera docker swarm join ...-kommandot.
+5. På workers: kör join-kommandot från steg 4.
+6. Rulla ut tjänsten på Swarm:
+
+```bash
+docker service create --name clo24-minapi \
+  --replicas 2 --publish 80:8080 <REGISTRY-IMAGE>
+docker service ls && docker service ps clo24-minapi
+```
 
 
 ## 2. Serverless - .NET Lambda + API Gateway
@@ -77,6 +94,25 @@ Båda alternativen kompletteras med **säkerhetsprinciper, IaC (Infrastructure a
 - Beskriver resurser: Lambda funktion, API Gateway event.  
 - CI/CD: GitHub Actions validerar SAM (`sam validate`) och bygger .NET Lambda projektet.  
 
+**Terraform (urklipp)**  
+```hcl
+provider "aws" {
+  region = var.region
+}
+
+variable "region" { default = "eu-north-1" }
+
+resource "aws_security_group" "web" {
+  name        = "clo24-web"
+  description = "Allow HTTP/HTTPS/SSH"
+  ingress = [
+    { from_port = 80,  to_port = 80,  protocol = "tcp", cidr_blocks = ["0.0.0.0/0"] },
+    { from_port = 443, to_port = 443, protocol = "tcp", cidr_blocks = ["0.0.0.0/0"] },
+    { from_port = 22,  to_port = 22,  protocol = "tcp", cidr_blocks = ["<DIN-IP/32>"] }
+  ]
+  egress = [{ from_port = 0, to_port = 0, protocol = "-1", cidr_blocks = ["0.0.0.0/0"] }]
+}
+```
 **Verifiering:**  
 - Lokal körning (`dotnet run --project LocalRunner/LocalRunner.csproj`) returnerar:  
   ```json
@@ -101,10 +137,45 @@ Båda alternativen kompletteras med **säkerhetsprinciper, IaC (Infrastructure a
   - Validerar Terraform och SAM.  
 - Säkerställer att koden alltid är i körbart skick.  
 
+**Exempel på GitHub Actions (förenklad version)**  
+```yaml
+name: CI
+on: { push: { branches: [main] } }
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with: { dotnet-version: '8.0.x' }
+
+      - run: dotnet build app-dotnet/app-dotnet.csproj -c Release
+      - run: docker build -t clo24-minapi:ci -f app-dotnet/Dockerfile app-dotnet
+
+      - uses: hashicorp/setup-terraform@v3
+      - run: |
+          cd infra-docker
+          terraform init -backend=false
+          terraform validate
+
+      - run: pipx install aws-sam-cli || pip install --user aws-sam-cli
+      - if: ${{ secrets.AWS_ACCESS_KEY_ID && secrets.AWS_SECRET_ACCESS_KEY }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            ${{ secrets.AWS_REGION || 'eu-north-1' }}
+      - if: ${{ secrets.AWS_ACCESS_KEY_ID && secrets.AWS_SECRET_ACCESS_KEY }}
+        run: sam validate -t infra-serverless/template.yaml --region ${{ secrets.AWS_REGION || 'eu-north-1' }}
+```
 **Observability & säkerhet**  
 - CloudWatch: Lambda-loggar i CloudWatch Logs (felsökning + larm/metrics möjliga).  
 - Secrets: GitHub Secrets för AWS-nycklar i CI, inga hemligheter i repo.  
 - Nätverk: Security Groups öppnar endast 80/443, övrigt stängt.  
+**Observability för Docker Swarm**  
+- Swarm-loggar kan skickas till CloudWatch via `awslogs` driver i service-definitionen.  
+- Alternativt central loggning med ELK eller Grafana Loki.  
+- Hälsa och repliker övervakas med `docker service ps`, larm kan sättas via CloudWatch Metrics.
 
 ### Säkerhet och hantering av secrets
 I projektet har jag medvetet undvikit att lägga känsliga uppgifter i källkod.
@@ -114,6 +185,16 @@ Applikationshemligheter hanteras via miljövariabler (och kan vid behov flyttas 
 I API lagret hanteras **CORS** i API Gateway. För containerdelen öppnas endast **80/443** i Security Groups.
 För Terraform körs `init -backend=false` och `validate` i CI för att validera IaC syntax utan att skapa resurser,
 nästa steg i en verklig miljö vore att konfigurera remote state och en godkännandekedja.
+**Exempel minimal IAM-policy för EC2 läsrättigheter (för CI)**  
+{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Action": ["ec2:DescribeInstances", "ec2:DescribeSecurityGroups"],
+    "Resource": "*"
+  }]
+}
+
 
 
 ## Screenshots
